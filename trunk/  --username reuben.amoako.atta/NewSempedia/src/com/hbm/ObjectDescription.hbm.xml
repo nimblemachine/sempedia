@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.hibernate.pojo.ObjectDescription" table="object_description">
+		<id name="objectDescriptionId" column="OBJECT_DESCRIPTION_ID" type="java.lang.Integer">
+			<generator class="increment" />
+		</id>
+		
+	 	<property name="objectImage" column="OBJECT_IMAGE" type="byte[]" />
+		<property name="objectDesc" column="OBJECT_DESC" type="java.lang.String" />
+		
+		<many-to-one name="objectPojo" class="com.hibernate.pojo.ObjectPojo" 
+			column="OBJECT_ID" foreign-key="object_id" lazy="false"/>
+		
+		
+	</class>
+</hibernate-mapping>

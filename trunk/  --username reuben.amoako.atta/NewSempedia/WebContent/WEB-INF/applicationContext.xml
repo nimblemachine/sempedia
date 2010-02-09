@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		
+		
+		
+		<property name="mappingResources">
+			<list>
+				<value>com/hbm/class.hbm.xml</value>
+				<value>com/hbm/object.hbm.xml</value>
+				<value>com/hbm/predicate.hbm.xml</value>
+				<value>com/hbm/triple.hbm.xml</value>
+				<value>com/hbm/inheritance.hbm.xml</value>
+				<value>com/hbm/ObjectDescription.hbm.xml</value>
+				<value>com/hbm/ClassDescription.hbm.xml</value> 
+				
+			</list>
+		</property>
+		<!-- <property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernate.dialect.MySQLDialect
+			</value>
+		</property> -->
+		<property name="hibernateProperties">
+			<props>
+				<!--  <prop key="hibernate.hbm2ddl.auto">create</prop>-->
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">false</prop>
+			</props>
+			
+		</property>
+		
+		<!-- <property name="hibernateProperties">
+        <props>
+            <prop key="hibernate.dialect">net.sf.hibernate.dialect.HSQLDialect</prop>
+            <prop key="hibernate.hbm2ddl.auto">create</prop>
+        </props>
+        </property> -->
+		
+		
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+	</bean>
+
+	<!-- <bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>com.mysql.jdbc.Driver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:mysql://localhost:3306/sempedia</value>
+		</property>
+		<property name="username">
+			<value>root</value>
+		</property>
+		<property name="password">
+			<value>root</value>
+		</property>
+	</bean> -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>${db.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${db.url}</value>
+		</property>
+		<property name="username">
+			<value>${db.username}</value>
+		</property>
+		<property name="password">
+			<value>${db.password}</value>
+		</property>
+	</bean>
+	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:properties/dbdetails.properties"/>
+	</bean>
+	
+	<bean id="loginDelegate" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyInterfaces">
+            <value>
+          	  com.delegate.LoginDelegate
+            </value>
+        </property>
+        <property name="target">
+            <ref bean="loginDelegateImpl"/>
+        </property>
+	</bean>
+	<bean id="loginDelegateImpl" class="com.delegate.impl.LoginDelegateImpl">
+		<property name="loginService">
+			<ref bean="loginService"/>
+		</property>
+	</bean>
+	<bean id="loginService" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.service.LoginService
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="loginServiceImpl"/>
+		</property>
+	</bean>
+	<bean id="loginServiceImpl" class="com.service.impl.LoginServiceImpl">
+		<property name="loginDAO">
+			<ref bean="loginDAO"/>
+		</property>
+	</bean>
+	
+	<bean id="loginDAO" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.LoginDAO
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="loginDAOImpl"/>
+		</property>
+	</bean>
+	<bean id="loginDAOImpl" class="com.dao.impl.LoginDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+	
+	 <!-- For class -->
+	<bean id="createClassDelegate" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.delegate.CreateClassDelegate
+			</value>
+		</property>
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+		<property name="target">
+			<ref bean="createClassDelegateImpl"/>
+		</property>
+	</bean>
+	<bean id="createClassDelegateImpl" class="com.delegate.impl.CreateClassDelegateImpl">
+		<property name="createClassService">
+			<ref bean="createClassService"/>
+		</property>
+	</bean>
+
+	 
+	<bean id="createClassService" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.service.CreateClassService
+			</value>
+		</property>
+		  
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+   	 	
+		<property name="target">
+			<ref bean="createClassServiceImpl"/>
+		</property>
+	</bean>
+	<bean id="createClassServiceImpl" class="com.service.impl.CreateClassServiceImpl">
+		<property name="createClassDAO">
+			<ref bean="createClassDAO"/>
+		</property>
+		<property name="predicateDAO">
+			<ref bean="predicateDAO"/>
+		</property>
+	</bean>
+	
+	<bean id="predicateDAO" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.PredicateDAO
+			</value>
+		</property>
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+		
+		<property name="target">
+			<ref bean="predicateDAOImpl"/>
+		</property>
+	</bean>
+	<bean id="predicateDAOImpl" class="com.dao.impl.PredicateDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+	<bean id="createClassDAO" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.CreateClassDAO
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="createClassDAOImpl"/>
+		</property>
+		
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+	</bean>
+	<bean id="createClassDAOImpl" class="com.dao.impl.CreateClassDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+	<!-- For class -->
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename">
+			<value>properties/messages</value>
+		</property>
+	</bean>
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<map>
+				<entry key="java.lang.Exception" value="errorPage" />
+			</map>
+		</property>
+	</bean>
+
+</beans>

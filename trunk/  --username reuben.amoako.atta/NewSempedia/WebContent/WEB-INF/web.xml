@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4">
+	
+	<display-name>NewSempedia</display-name>
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/*Context.xml</param-value>
+	
+	</context-param>
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+	<servlet>
+        <servlet-name>spring-web-json</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>spring-web-json</servlet-name>
+        <url-pattern>*.json</url-pattern>
+    </servlet-mapping>
+	 <servlet>
+            <servlet-name>dispatcher</servlet-name>
+	            <servlet-class>
+	    	          org.springframework.web.servlet.DispatcherServlet
+	            </servlet-class>
+            <load-on-startup>1</load-on-startup>
+      </servlet>
+
+      <servlet-mapping>
+            <servlet-name>dispatcher</servlet-name>
+            <url-pattern>*.htm</url-pattern>
+      </servlet-mapping>
+	
+	<welcome-file-list>
+		<welcome-file>/jsp/redirect.jsp</welcome-file>
+	</welcome-file-list>
+	
+	<error-page>
+        <error-code>404</error-code>
+        <location>/jsp/error404.jsp</location>
+    </error-page>
+    
+    <error-page>
+        <error-code>500</error-code>
+        <location>/jsp/serverError.jsp</location>
+    </error-page>
+
+	<taglib>
+		<taglib-uri>/spring</taglib-uri>
+		<taglib-location>/WEB-INF/taglibs/spring.tld</taglib-location>
+	</taglib>
+	<taglib>
+	      <taglib-uri>http://displaytag.sourceforge.net/</taglib-uri>
+        <taglib-location>/WEB-INF/taglibs/displaytag-12.tld</taglib-location>
+    </taglib>
+    <taglib>
+	      <taglib-uri>/c</taglib-uri>
+        <taglib-location>/WEB-INF/taglibs/c.tld</taglib-location>
+    </taglib>
+   
+</web-app>

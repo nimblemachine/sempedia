@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.view.json.exception.JsonExceptionResolver">
+    	<property name="exceptionView"><value>json1</value></property>
+		<property name="errorHandler">
+	    	<list>
+	        	<ref bean="statusError" />
+	        	<ref bean="modelflagError" />
+	        </list>
+        </property>
+        <property name="exceptionHandler">
+	    	<list>
+	        	<ref bean="stackTraceExceptionHandler" />
+	        	<ref bean="exceptionMessageExceptionHandler" />
+	        </list>
+        </property>
+	</bean>
+	
+	<bean name="statusError" class="org.springframework.web.servlet.view.json.error.HttpStatusError">
+		<property name="errorCode"><value>311</value></property>
+	</bean>
+	
+	<bean name="modelflagError" class="org.springframework.web.servlet.view.json.error.ModelFlagError">
+		<property name="name"><value>failure</value></property>
+		<property name="value"><value>true</value></property>
+	</bean>
+	
+	<bean name="stackTraceExceptionHandler" class="org.springframework.web.servlet.view.json.exception.StackTraceExceptionHandler">
+		<property name="replaceLineBreakes"><value>true</value></property>
+	</bean>
+	
+	<bean name="exceptionMessageExceptionHandler" class="org.springframework.web.servlet.view.json.exception.ExceptionMessageExceptionHandler"/>
+	
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="messages"/>
+	</bean>
+	
+	
+	 <bean id="tripleSubjectController" class="com.controller.TripleSubjectController">
+	<property name="searchDelegateAjax">
+			<ref bean="searchDelegateAjax"/>
+		</property>
+	</bean>
+	<bean id="triplePredicateController" class="com.controller.TriplePredicateController">
+	<property name="searchDelegateAjax">
+			<ref bean="searchDelegateAjax"/>
+		</property>
+	</bean>
+	
+	<bean id="searchDelegateAjax" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.delegate.SearchDelegateAjax
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="searchDelegateAjaxImpl"/>
+		</property>
+		
+	</bean>
+	<bean id="searchDelegateAjaxImpl" class="com.delegate.impl.SearchDelegateAjaxImpl">
+		<property name="searchServiceAjax">
+			<ref bean="searchServiceAjax"/>
+		</property>
+	</bean>
+	<bean id="searchServiceAjax" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.service.SearchServiceAjax
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="searchServiceAjaxImpl"/>
+		</property>
+		
+	</bean>
+	<bean id="searchServiceAjaxImpl" class="com.service.impl.SearchServiceAjaxImpl">
+		<property name="predicateDAOAjax">
+			<ref bean="predicateDAOAjax"/>
+		</property>
+	</bean>
+	<bean id="predicateDAOAjax" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.PredicateDAOAjax
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="predicateDAOAjaxImpl"/>
+		</property>
+		
+	</bean>
+	<bean id="predicateDAOAjaxImpl" class="com.dao.impl.PredicateDAOAjaxImpl">
+		<property name="hibernateTemplate">
+			<ref bean="hibernateTemplate"/>
+		</property>
+	</bean>
+	
+	<bean id="hibernateTemplate" 
+class="org.springframework.orm.hibernate3.HibernateTemplate">
+    <property name="sessionFactory">
+        <ref bean="sessionFactoryAjax"/>
+    </property>
+</bean>
+	
+	
+	<bean id="sessionFactoryAjax" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		
+		
+		
+		<property name="mappingResources">
+			<list>
+				<value>com/hbm/class.hbm.xml</value>
+				<value>com/hbm/object.hbm.xml</value>
+				<value>com/hbm/predicate.hbm.xml</value>
+				<value>com/hbm/triple.hbm.xml</value>
+				<value>com/hbm/inheritance.hbm.xml</value>
+				
+			</list>
+		</property>
+		<!-- <property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernate.dialect.MySQLDialect
+			</value>
+		</property> -->
+		<property name="hibernateProperties">
+			<props>
+				<!--  <prop key="hibernate.hbm2ddl.auto">create</prop>-->
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">false</prop>
+			</props>
+			
+		</property>
+		
+		<!-- <property name="hibernateProperties">
+        <props>
+            <prop key="hibernate.dialect">net.sf.hibernate.dialect.HSQLDialect</prop>
+            <prop key="hibernate.hbm2ddl.auto">create</prop>
+        </props>
+        </property> -->
+		
+		
+		<property name="dataSource">
+			<ref bean="dataSourceAjax" />
+		</property>
+	</bean>
+
+	<!-- <bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>com.mysql.jdbc.Driver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:mysql://localhost:3306/sempedia</value>
+		</property>
+		<property name="username">
+			<value>root</value>
+		</property>
+		<property name="password">
+			<value>root</value>
+		</property>
+	</bean> -->
+	 
+	<bean id="dataSourceAjax"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>${db.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${db.url}</value>
+		</property>
+		<property name="username">
+			<value>${db.username}</value>
+		</property>
+		<property name="password">
+			<value>${db.password}</value>
+		</property>
+	</bean>
+	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:properties/dbdetails.properties"/>
+	</bean>
+     
+    <bean name="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                
+                <prop key="/tripleSubject.json">tripleSubjectController</prop>
+                <prop key="/triplePridicate.json">triplePredicateController</prop>
+            </props>
+        </property>
+    </bean>
+    <bean  name="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver" />
+</beans>

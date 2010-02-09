@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+<!-- For class -->
+	<bean id="createClassDelegate" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.delegate.CreateClassDelegate
+			</value>
+		</property>
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+		<property name="target">
+			<ref bean="createClassDelegateImpl"/>
+		</property>
+	</bean>
+	<bean id="createClassDelegateImpl" class="com.delegate.impl.CreateClassDelegateImpl">
+		<property name="createClassService">
+			<ref bean="createClassService"/>
+		</property>
+	</bean>
+
+	 
+	<bean id="createClassService" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.service.CreateClassService
+			</value>
+		</property>
+		  
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+   	 	
+		<property name="target">
+			<ref bean="createClassServiceImpl"/>
+		</property>
+	</bean>
+	<bean id="createClassServiceImpl" class="com.service.impl.CreateClassServiceImpl">
+		<property name="createClassDAO">
+			<ref bean="createClassDAO"/>
+		</property>
+		<property name="predicateDAO">
+			<ref bean="predicateDAO"/>
+		</property>
+	</bean>
+	
+	<bean id="predicateDAO" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.PredicateDAO
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="predicateDAOImpl"/>
+		</property>
+		
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+	</bean>
+	<bean id="predicateDAOImpl" class="com.dao.impl.PredicateDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+	<bean id="createClassDAO" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>
+				com.dao.CreateClassDAO
+			</value>
+		</property>
+		<property name="target">
+			<ref bean="createClassDAOImpl"/>
+		</property>
+		
+		<property name="interceptorNames">
+		      <list>
+		        <value>loggingInterceptor</value>
+		      </list>
+   	 	</property>
+	</bean>
+	<bean id="createClassDAOImpl" class="com.dao.impl.CreateClassDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+	<!-- For class -->
+</beans>

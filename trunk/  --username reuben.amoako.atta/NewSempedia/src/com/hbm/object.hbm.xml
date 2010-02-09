@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.hibernate.pojo.ObjectPojo" table="object">
+		<id name="objectId" column="OBJECT_ID" type="java.lang.Integer">
+			<generator class="increment" />
+		</id>
+		<property name="objectName" column="OBJECT_NAME"
+			type="java.lang.String" />
+			
+		<property name="classId" column="CLASS_ID" type="java.lang.Integer" />
+			
+		
+		<!-- <many-to-one name="classObject" class="com.hibernate.pojo.ClassPojo"
+			 lazy="false" column="CLASS_ID">
+		</many-to-one>-->
+		
+		
+		
+	</class>
+</hibernate-mapping>

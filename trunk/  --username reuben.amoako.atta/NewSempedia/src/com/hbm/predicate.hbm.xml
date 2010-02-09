@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.hibernate.pojo.Predicate" table="predicate">
+		<id name="predicateId" column="PREDICATE_ID" type="java.lang.Integer">
+			<generator class="increment" />
+		</id>
+		
+		<property name="predicateName" column="PREDICATE_NAME"
+			type="java.lang.String" />
+			
+		<many-to-one name="classObject" class="com.hibernate.pojo.ClassPojo"
+		 	lazy="false" column="CLASS_ID">
+		</many-to-one>
+		
+		<set name="triples" table="triple" lazy="true" cascade="all" >
+			<key column="PREDICATE_ID" />
+			<one-to-many class="com.hibernate.pojo.Triple"/>
+		</set>
+		
+	</class>
+</hibernate-mapping>

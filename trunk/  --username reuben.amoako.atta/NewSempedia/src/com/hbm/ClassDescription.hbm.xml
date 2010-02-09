@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.hibernate.pojo.ClassDescription" table="class_description">
+		<id name="classTextId" column="ClASS_TEXT_ID" type="java.lang.Integer">
+			<generator class="increment" />
+		</id>
+		
+		<property name="text" column="PARA_TEXT" type="java.lang.String" />
+		<property name="style" column="PARA_STYLE" type="java.lang.String" />
+		
+		<many-to-one name="classPojo" class="com.hibernate.pojo.ClassPojo" 
+			column="CLASS_ID" foreign-key="class_id" lazy="false"/>
+		
+	</class>
+</hibernate-mapping>

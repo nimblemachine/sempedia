@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.hibernate.pojo.Inheritance" table="inheritance">
+		<id name="inheritanceId" column="INHERITANCE_ID" type="java.lang.Integer">
+			<generator class="increment" />
+		</id>
+		
+			
+		<many-to-one name="subClass" class="com.hibernate.pojo.ClassPojo"
+			 lazy="false" column="SUBCLASS">
+		</many-to-one>
+		
+		 <many-to-one name="superClass" class="com.hibernate.pojo.ClassPojo"
+			 lazy="false" column="SUPERCLASS">
+		</many-to-one>
+	
+	</class>
+</hibernate-mapping>
