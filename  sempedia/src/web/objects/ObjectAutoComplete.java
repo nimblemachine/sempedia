@@ -48,7 +48,7 @@ public class ObjectAutoComplete extends HttpServlet {
 			}
 			itrCount++;
 		}
-System.out.println(objectListAsString);
+//System.out.println(objectListAsString);
 		out.write(objectListAsString);	
 	}
 }

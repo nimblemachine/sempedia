@@ -113,7 +113,7 @@ public class ObjectDao {
 		// we are now guaranteed that the class and object are both in the database
 		int objectId = getObjectId(objectName);
 		int classId = cdao.getClassId(className);
-System.out.println("Class Id - "+classId);		
+//System.out.println("Class Id - "+classId);		
 		
 		ObjClaRelDao ocrdao = new ObjClaRelDao();
 		ocrdao.addObjCla(objectId,classId);

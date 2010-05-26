@@ -49,7 +49,7 @@ public class PredAutoComplete extends HttpServlet {
 			}
 			itrCount++;
 		}
-System.out.println(predListAsString);
+//System.out.println(predListAsString);
 		out.write(predListAsString);	
 	}
 }

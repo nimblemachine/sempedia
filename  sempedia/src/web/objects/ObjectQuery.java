@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import model.PredObj;
 import model.JSON.JSONArray;
 import model.JSON.JSONException;
 import model.JSON.JSONObject;
@@ -22,7 +23,7 @@ import dao.TripleDao;
 @SuppressWarnings("serial")
 public class ObjectQuery extends HttpServlet {
 	
-	
+	// takes a faceted query and searches for matching objects 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		
 		response.setContentType("text/json");		
@@ -30,7 +31,8 @@ public class ObjectQuery extends HttpServlet {
 		String count = (String)request.getParameter("count");
 		int noOfVals = Integer.parseInt(count); 
 		
-		HashMap<Integer,Integer> vals = new HashMap<Integer,Integer>();
+//		HashMap<Integer,Integer> vals = new HashMap<Integer,Integer>();
+		ArrayList<PredObj> vals = new ArrayList<PredObj>();
 		for(int i=0; i<noOfVals;i++){
 			String preIdS;
 			String objIdS;
@@ -40,21 +42,25 @@ public class ObjectQuery extends HttpServlet {
 			preIdS = request.getParameter("preId"+i);
 			objIdS = request.getParameter("objId"+i);
 			
-			if((preIdS!=null)||(preIdS!="")){
+			if(((preIdS!=null)||(preIdS!=""))&&(preIdS!="-99")){	//changed evening 26th May 2010
 				preId = Integer.parseInt(request.getParameter("preId"+i));
 			}
 			else{
 				preId=-89;
 			}
-			if((objIdS!=null)||(objIdS!="")){
+			if(((objIdS!=null)||(objIdS!=""))&&(objIdS!="-99")){ 	//changed evening 26th May 2010
 				objId = Integer.parseInt(request.getParameter("objId"+i));
 			}
 			else{
 				objId = -89;
 			}
-			vals.put(preId, objId);
+//			vals.put(preId, objId);
+			PredObj npo = new PredObj(preId,objId);
+			if(!(preId==-99)){
+				vals.add(npo);
+			}
 		}
-		System.out.println("VALS: "+vals);
+//		System.out.println("VALS: "+vals);
 		
 		TripleDao tdao = new TripleDao();
 		List<Integer> finalList = new ArrayList<Integer>();

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import model.PredObj;
 import model.TriplePOJO;
 
 public class TripleDao {
@@ -233,11 +234,11 @@ public class TripleDao {
 		inStmt=inStmt+itr.next();
 			if(itr.hasNext()){
 				inStmt=inStmt+" ,";
-System.out.println(inStmt);
+//System.out.println(inStmt);
 			}
 			else inStmt = inStmt+")";
 		}
-System.out.println(inStmt);
+//System.out.println(inStmt);
 		Statement stmt = con.createStatement();
 		ResultSet rs = stmt.executeQuery("select sub_id from triples where pre_id in "+inStmt);
 		int c=0;
@@ -275,27 +276,33 @@ System.out.println(inStmt);
 		return objects;
 	}
 	
-	public List<Integer> queryObjs(HashMap<Integer,Integer> preObs) throws SQLException{
+	public List<Integer> queryObjs(ArrayList<PredObj> preObs) throws SQLException{
 		ObjectDao odao = new ObjectDao();
 		
 			DBCon db = new DBCon();
 			Connection con = db.getCon();
 			
-			Set<Integer> predSet = new HashSet<Integer>();
-			predSet = preObs.keySet();
-			Iterator<Integer> itr = predSet.iterator();
+//			Set<Integer> predSet = new HashSet<Integer>();
+//			predSet = preObs.keySet();
+//			Iterator<Integer> itr = predSet.iterator();
+//			
+			Iterator<PredObj> itr = preObs.iterator();
+			
 			
 			ArrayList<ArrayList<Integer>> queryLists = new ArrayList<ArrayList<Integer>>();		
 			while(itr.hasNext()){ //iterate over the HashMap of predicate/object pairs
-				int nextPre = itr.next();
+				PredObj po = itr.next();
+				int nextPre = po.getPreId();
 				Statement stmt = con.createStatement();
-				int objId = preObs.get(nextPre);
+				//int objId = preObs.get(nextPre);
+				int nextObj = po.getObjId();
 				ResultSet rs;
-				if(objId==-1){
+				if((nextObj==-1)||(nextObj==-99)){
 				rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre);
 				}
 				else{
-					rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre+" AND obj_id="+objId);
+					rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre+" AND obj_id="+nextObj);
+
 				}
 				ArrayList<Integer> listOfSubs = new ArrayList<Integer>();
 				while(rs.next()){
@@ -303,81 +310,44 @@ System.out.println(inStmt);
 					listOfSubs.add(sub);
 				}
 				queryLists.add(listOfSubs);	
-			}
-	System.out.println(queryLists);
+			}//finish iterating over predicates
+			
+			
+	//System.out.println(queryLists);
 
 			List<Integer> finalResults = new ArrayList<Integer>();
 			finalResults = intersection(queryLists);
-			
-			System.out.println("Final results: "+finalResults);
-//			int size = finalResults.size();
+		
 			return finalResults;
 		}	
 	
-//	public List<Integer> queryObjs(HashMap<Integer,Integer> preObs) throws SQLException{
-//		
-//		ObjectDao odao = new ObjectDao();
-//		
-//		DBCon db = new DBCon();
-//		Connection con = db.getCon();
-//		
-//		Set<Integer> predSet = new HashSet<Integer>();
-//		predSet = preObs.keySet();
-//		Iterator<Integer> itr = predSet.iterator();
-//		
-//		ArrayList<ArrayList<Integer>> queryLists = new ArrayList<ArrayList<Integer>>();		
-//		while(itr.hasNext()){ //iterate over the HashMap of predicate/object pairs
-//			int nextPre = itr.next();
-//			Statement stmt = con.createStatement();
-//			int objId = preObs.get(nextPre);
-//			ResultSet rs;
-//			if(objId==-1){
-//				rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre);
-//				}
-//				else{
-//					rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre+" AND obj_id="+objId);
-//				}
-//			ArrayList<Integer> listOfSubs = new ArrayList<Integer>();
-//			while(rs.next()){
-//				int sub = rs.getInt("sub_id");
-//				listOfSubs.add(sub);
-//			}
-//			queryLists.add(listOfSubs);	
-//		}
-//System.out.println(queryLists);
-//		List<Integer> finalResults = new ArrayList<Integer>();
-//		finalResults = intersection(queryLists);
-//		
-//		Iterator<Integer> itr2 = finalResults.iterator();
-//		while(itr2.hasNext()){
-////System.out.println("final results: "+itr2.next());
-//		}
-//				
-//		return finalResults;
-//	}
 	
-	
-	public int countObjs(HashMap<Integer,Integer> preObs) throws SQLException{
+	public int countObjs(ArrayList<PredObj> preObs) throws SQLException{
 	ObjectDao odao = new ObjectDao();
 	
 		DBCon db = new DBCon();
 		Connection con = db.getCon();
 		
-		Set<Integer> predSet = new HashSet<Integer>();
-		predSet = preObs.keySet();
-		Iterator<Integer> itr = predSet.iterator();
+//		Set<Integer> predSet = new HashSet<Integer>();
+//		predSet = preObs.keySet();
+//		Iterator<Integer> itr = predSet.iterator();
+		
+		Iterator<PredObj> itr = preObs.iterator();
+		
 		
 		ArrayList<ArrayList<Integer>> queryLists = new ArrayList<ArrayList<Integer>>();		
 		while(itr.hasNext()){ //iterate over the HashMap of predicate/object pairs
-			int nextPre = itr.next();
+			PredObj po = itr.next();
+			int nextPre = po.getPreId();
 			Statement stmt = con.createStatement();
-			int objId = preObs.get(nextPre);
+			//int objId = preObs.get(nextPre);
+			int nextObj = po.getObjId();
 			ResultSet rs;
-			if(objId==-1){
+			if((nextObj==-1)||(nextObj==-99)){
 			rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre);
 			}
 			else{
-				rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre+" AND obj_id="+objId);
+				rs = stmt.executeQuery("SELECT * FROM triples WHERE pre_id="+nextPre+" AND obj_id="+nextObj);
 
 			}
 			ArrayList<Integer> listOfSubs = new ArrayList<Integer>();
@@ -386,13 +356,15 @@ System.out.println(inStmt);
 				listOfSubs.add(sub);
 			}
 			queryLists.add(listOfSubs);	
-		}
-System.out.println(queryLists);
+		}//finish iterating over predicates
+		
+		
+//System.out.println(queryLists);
 
 		List<Integer> finalResults = new ArrayList<Integer>();
 		finalResults = intersection(queryLists);
 		
-		System.out.println("Final results: "+finalResults);
+//		System.out.println("Final results: "+finalResults);
 		int size = finalResults.size();
 		return size;
 	}

@@ -6,6 +6,7 @@
 <%@ page import="model.TriplePOJO"%>
 <%@ page import="dao.PredicateDao"%>
 <%@ page import="dao.ObjectDao;"%>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -26,7 +27,24 @@
 		
 		var queryPredicates = new Array();
 		var queryObjects = new Array();
+		<%
+		ArrayList<TriplePOJO> triples = new ArrayList<TriplePOJO>();
+		triples = (ArrayList<TriplePOJO>) request.getAttribute("triples");
+  		Iterator<TriplePOJO> itrA = triples.iterator();
+		int c=0;
+		while (itrA.hasNext()) {
+			TriplePOJO atriple = new TriplePOJO();
+			atriple = itrA.next();
+		%>	
+			queryPredicates[<% out.print(c); %>]=-99;
+			queryObjects[<% out.print(c); %>]=-99;
+		<%
+			c++;
+			}
+		%>
 
+//////////////////////
+		
 		  $.ajax({
 		        type: "GET",
 		        url: "ObjectAutoComplete",
@@ -36,7 +54,9 @@
 		            $("#object-name").autocomplete(dataArray);
 		        }
 		    });
-
+		    
+//////////////////////
+		    
 		  $.ajax({
 		        type: "GET",
 		        url: "PredAutoComplete",
@@ -46,12 +66,16 @@
 		            $("#predicate-name").autocomplete(dataArray2);
 		        }
 		    });
-			
+		    
+//////////////////////
+				
 		$(".predicate").hover(function() {
 			$(this).addClass("select-button");
 			}, function() {
 			$(this).removeClass("select-button");
 		});
+
+//////////////////////		
 
 		function removeItem(arrayName,arrayElement)
 		 {
@@ -61,6 +85,8 @@
 		            arrayName.splice(i,1); 
 		      } 
 		  }
+
+//////////////////////
 		
 		function getObjectCount(){
 			var variables = queryPredicates.length;	//the number of variables is found by the length of the arrays - they should both be of the same length
@@ -68,9 +94,10 @@
 			for(var i=0; i<variables;i++){
 				    queryString=queryString+"&preId"+i+"="+queryPredicates[i]+"&objId"+i+"="+queryObjects[i]; //add another array element to the queryString
 				}
+//alert(queryString);
 			//send the queryString to the servlet that does the counting
 			$.ajax( {
-				type: "GET",
+			type: "GET",
 				url: "ObjectCount",
 				dataType: 'json',
 				data: queryString,
@@ -80,6 +107,8 @@
 			});
 			queryString="";
 		}
+
+//////////////////////
 
 		function getObjectList(){
 			var variables = queryPredicates.length;	//the number of variables is found by the length of the arrays - they should both be of the same length
@@ -98,7 +127,7 @@
 				{
 					$("#displayObjects").empty(); 
 				    $.each(resultObj, function(i,value) {    	 
-					    $("#displayObjects").append("<table border='0' cellspacing='2' cellpadding='4'><tr><td><table border='0' cellspacing='0' cellpadding='4'><tr objId='"+resultObj[i].objId+"'><td nowrap='nowrap' bgcolor='#EEEEEE' class='objItem' objId='"+resultObj[i].objId+"'><span class='normal-small'>"+resultObj[i].objName+"</span></td><td bgcolor='#EEEEEE' ><a href='ObjectPage?id="+resultObj[i].objId+"'><img src='images/object-page.gif' alt='' width='16' height='16' /></a></td></tr></table></td></tr></table>");  
+					    $("#displayObjects").append("<table border='0' cellspacing='2' cellpadding='4'><tr><td><table border='0' cellspacing='0' cellpadding='4'><tr objId='"+resultObj[i].objId+"'><td nowrap='nowrap' bgcolor='#EEEEEE' class='objItem' objId='"+resultObj[i].objId+"'><span class='normal-small'>"+resultObj[i].objName+"</span></td><td bgcolor='#EEEEEE' ><a href='ObjectPage?id="+resultObj[i].objId+"'><img src='images/icons/copper-file.png' alt='' width='16' height='16' /></a></td></tr></table></td></tr></table>");  
 // $("#displayObjects").append("<a class='result' href='ObjectPage?id="+resultObj[i].objId+"'><div id='"+resultObj[i].objId+"'>"+resultObj[i].objName+"</div></a>");	
 				      	});
 					}
@@ -114,54 +143,121 @@
 			$("#sem-browse").toggle('slow');			
 		});		
 		
+//////////////////////
+
 		$(".predicate").live('click',function(){
 			var preId = this.id;
 			var objId ="-1";
+			var preArrayPos = $(this).attr('preArrayPos');
+//alert(preArrayPos);
 			var preName = $(".predName").filter("[preId='"+preId+"']").attr('preName');
+//			alert(preId+" - "+objId+" - "+preArrayPos+" - "+preName);
+
+			var isEmpty;
 			
-			var arrayPos = $.inArray(preId,queryPredicates);	//if the predicate doesn't exist in the array
-			if(arrayPos==-1){
-			queryPredicates.push(preId);
-			queryObjects.push(objId);
+			if((queryPredicates[preArrayPos]==-99)&&(queryObjects[preArrayPos]==-99)){
+				queryPredicates[preArrayPos]=preId;
+				queryObjects[preArrayPos]=-1;
+				isEmpty=true;
+				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"' arrayPos='"+preArrayPos+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' arrayPos='"+preArrayPos+"' src='images/close.gif' height='9' width='9'/></span></p>");
+//alert("the position IS empty");
 			}
-			else{	//if the predicate already has an entry in the array
-				queryObjects[arrayPos]=objId; //we only need to edit the entry for the objectId because the predciateId can't change
+			else{
+				queryPredicates[preArrayPos]=preId;
+				queryObjects[preArrayPos]=-1;
+				isEmpty=false;
+//alert("the position is NOT empty");
+				$(".queryItem").filter("[predId='"+preId+"']").filter("[arrayPos='"+preArrayPos+"']").html("<p class='queryItem' predId='"+preId+"' arrayPos='"+preArrayPos+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' arrayPos='"+preArrayPos+"' src='images/close.gif' height='9' width='9'/></span></p>");
+				
 			}
-			if($(".queryItem").filter("[predId='"+preId+"']").length>0){ //means that the query item is already displayed
-				$(".queryItem").filter("[predId='"+preId+"']").html("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' src='images/close.gif' height='9' width='9'/></span></p>");
-			} else {
-				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' src='images/close.gif' height='9' width='9'/></span></p>");
-				}
 			getObjectCount();
-			$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");			
-		});
+			$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");		
+//alert(queryPredicates);
+//alert(queryObjects);
 			
+		});
+		
+//		$(".predicate").live('click',function(){
+//			var preId = this.id;
+//			var objId ="-1";
+//			var preName = $(".predName").filter("[preId='"+preId+"']").attr('preName');
+//			
+//			var arrayPos = $.inArray(preId,queryPredicates);	//if the predicate doesn't exist in the array
+//			if(arrayPos==-1){	//that is the predicate doesn't exist
+//			queryPredicates.push(preId);
+//			queryObjects.push(objId);
+//			}
+//			else{	//if the predicate already has an entry in the array
+//				queryObjects[arrayPos]=objId; //we only need to edit the entry for the objectId because the predciateId can't change
+//			}
+//			if($(".queryItem").filter("[predId='"+preId+"']").length>0){ //means that the query item is already displayed
+//				$(".queryItem").filter("[predId='"+preId+"']").html("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' src='images/close.gif' height='9' width='9'/></span></p>");
+//			} else {
+//				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals anything <img class='deleteQueryItem' predId='"+preId+"' objId='-1' src='images/close.gif' height='9' width='9'/></span></p>");
+//				}
+//			getObjectCount();
+//			$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");			
+//		});
+
+//////////////////////
+
 		$(".object").live('click',function(){
 			var preId = $(this).attr('preId');
 			var objId = this.id;
+			var objArrayPos = $(this).attr('objArrayPos');
+//alert(objArrayPos);
 			var preName = $(".predName").filter("[preId='"+preId+"']").attr('preName');
 			var objName = $(".objectName").filter("[objId='"+objId+"']").attr('objName');
-			//before adding the predicate and object pair check that a corresponding entry doesn't already exist
-			var arrayPos = $.inArray(preId,queryPredicates);	//if the predicate doesn't exist in the array
-			if(arrayPos==-1){
-				queryPredicates.push(preId);
-				queryObjects.push(objId);
-			}
-			else{	//if the predicate already has an entry in the array
-				queryObjects[arrayPos]=objId; //we only need to edit the entry for the objectId because the predciateId can't change
-			}
-			
-			if($(".queryItem").filter("[predId='"+preId+"']").length>0){ //means that the query item is already displayed
-				$(".queryItem").filter("[predId='"+preId+"']").html("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' src='images/close.gif' height='9' width='9'/></span></p>");
-			} else {
-				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' src='images/close.gif' height='9' width='9'/></span></p>");
+//			alert(preId+" - "+objId+" - "+objArrayPos+" - "+preName+" - "+objName);
+
+			if((queryObjects[objArrayPos]==-99)&&(queryPredicates[objArrayPos]==-99)){
+				queryObjects[objArrayPos]=objId;
+				queryPredicates[objArrayPos]=preId;
+				isEmpty=true;
+				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"' arrayPos='"+objArrayPos+"'><span class='normal-small' ><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' arrayPos='"+objArrayPos+"' src='images/close.gif' height='9' width='9'/></span></p>");
+//alert("the position IS empty");
 				}
+			else{
+				queryObjects[objArrayPos]=objId;
+				isEmpty=false;
+//alert("the position is NOT empty");
+				$(".queryItem").filter("[predId='"+preId+"']").filter("[arrayPos='"+objArrayPos+"']").html("<p class='queryItem' predId='"+preId+"' arrayPos='"+objArrayPos+"'><span class='normal-small'><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' arrayPos='"+objArrayPos+"' src='images/close.gif' height='9' width='9'/></span></p>");
+			}
 			getObjectCount();
 			$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");
+//alert(queryPredicates);
+//alert(queryObjects);
 		});
+
+//		$(".object").live('click',function(){
+//			var preId = $(this).attr('preId');
+//			var objId = this.id;
+//			var preName = $(".predName").filter("[preId='"+preId+"']").attr('preName');
+//			var objName = $(".objectName").filter("[objId='"+objId+"']").attr('objName');
+//			//before adding the predicate and object pair check that a corresponding entry doesn't already exist
+//			var arrayPos = $.inArray(preId,queryPredicates);	//if the predicate doesn't exist in the array
+//			if(arrayPos==-1){
+//				queryPredicates.push(preId);
+//				queryObjects.push(objId);
+//			}
+//			else{	//if the predicate already has an entry in the array
+//				queryObjects[arrayPos]=objId; //we only need to edit the entry for the objectId because the predciateId can't change
+//			}
+//			
+//			if($(".queryItem").filter("[predId='"+preId+"']").length>0){ //means that the query item is already displayed
+//				$(".queryItem").filter("[predId='"+preId+"']").html("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' src='images/close.gif' height='9' width='9'/></span></p>");
+//			} else {
+//				$("#displayQuery").append("<p class='queryItem' predId='"+preId+"'><span class='normal-small'><b>"+preName+"</b> equals <b>"+objName+"</b> <img class='deleteQueryItem' predId='"+preId+"' objId='"+objId+"' src='images/close.gif' height='9' width='9'/></span></p>");
+//				}
+//			getObjectCount();
+//			$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");
+//		});
+
+//////////////////////
 
 		$(".deleteQueryItem").live('click',function() {
 			 $("#displayObjects").empty(); 
+				var arrayPos = $(this).attr('arrayPos');
 			//remove the item from the two main arrays
 			// remove the item from the support array
 			//remove the item from the screen
@@ -172,9 +268,9 @@
 			var countVal = $.inArray(preId, queryPredicates);
 			if(countVal!=-1){
 				//remove the array values
-				$(".queryItem").filter("[predId='"+preId+"']").remove();
-				removeItem(queryPredicates,preId);
-				removeItem(queryObjects,objId);
+				$(".queryItem").filter("[predId='"+preId+"']").filter("[arrayPos='"+arrayPos+"']").remove();
+				queryPredicates[arrayPos]=-99;
+				queryObjects[arrayPos]=-99;
 				}
 			getObjectCount();
 			//$("#getObjButton").html("<input type='submit' value='Get More Objects'/>");
@@ -186,8 +282,7 @@
 <body>
 <form id="object">
 <%
-	ArrayList<TriplePOJO> triples = new ArrayList<TriplePOJO>();
-	triples = (ArrayList<TriplePOJO>) request.getAttribute("triples");
+
 	PredicateDao pdao = new PredicateDao();
 	ObjectDao odao = new ObjectDao();
 	
@@ -238,8 +333,10 @@
 <hr width="80%" size="1" />
 <table width="80%" border="0" align="center" cellpadding="8" cellspacing="0">
 	<tr>
-		<td valign="top"><strong><span class="Header2-black">
-		<% out.print((String) request.getAttribute("objectName")); %>
+		<td valign="top"><strong><span>
+		 <a href="ObjectPage?id=<% out.print(request.getAttribute("objId")); %>" class="Header2-black">
+			<% out.print((String) request.getAttribute("objectName")); %>
+		</a>
 		</span></strong>
 		<%
 			HashMap<Integer, String> classes = new HashMap<Integer, String>();
@@ -353,37 +450,41 @@
 	</tr>
 	<tr>
 	<td>
-	
 	</td>
 	</tr>
 </table>
+
+<!--  This is where the predicates and objects (triples) are listed -->
 <table width="80%" border="0" align="center" cellpadding="8" cellspacing="0">
 	<tr>
 		<td height="100%" colspan="2" valign="top" width="15%">
 		<table border="0" cellspacing="0" cellpadding="2" id="semtag">
 			<%
 				Iterator<TriplePOJO> itr = triples.iterator();
+				int count=0;
 				while (itr.hasNext()) {
 					TriplePOJO atriple = new TriplePOJO();
 					atriple = itr.next();
 			%>
 			<tr>
 				<td nowrap="nowrap">
-					<div class="predicate" id="<% out.print(atriple.getPreId()); %>">
-					<span class="normal">
-					<% out.print(pdao.getPredName(atriple.getPreId())); %>
-					</span></div>
+					<div class="predicate" id="<% out.print(atriple.getPreId()); %>" preArrayPos="<% out.print(count); %>">
+						<span class="normal">
+						<% out.print(pdao.getPredName(atriple.getPreId())); %>
+						</span>
+					</div>
 				</td>
 				<td><img src="images/right.jpg" alt="-" width="16" height="10" /></td>
 				<td><a href="ObjectPage?id=<% out.print(atriple.getObjId()); %>"><img src="images/icons/copper-file.png" alt="" width="16" height="16" /></a></td>
 				<td nowrap>
-					<div class="object" id="<% out.print(atriple.getObjId());%>" preId="<% out.print(atriple.getPreId()); %>">
+					<div class="object" id="<% out.print(atriple.getObjId());%>" preId="<% out.print(atriple.getPreId()); %>"  objArrayPos="<% out.print(count); %>">
 					<span class="normal">
 					<% out.print(odao.getObjectName(atriple.getObjId())); %>
 					</span></div>
 				 </td>
 			</tr>				
-			<% } %>
+			<% count++;
+			} %>
 		</table>
 		</td>
 		<td valign="top">
@@ -418,6 +519,7 @@
 		</td>
 	</tr>
 </table>
+<!--  end triples and faceted search area -->
 <table width="80%" border="0" align="center" cellpadding="0" cellspacing="0">
 	<tr><td bgcolor="#4C88BE"><img src="images/1px-transparent.gif" width="1" height="1" alt="1px" /></td></tr>
 </table>
