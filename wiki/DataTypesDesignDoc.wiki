@@ -1,0 +1,12 @@
+#labels datatypes
+A description of how the new concept of data types will be implemented (i.e. object, text, number, GEO, etc.)
+
+= Introduction =
+
+In order to make Sempedia genuiinely useful, several things need to be addressed. Currently one particularly useful feature is that when a triple is described the object of the triple immediately becomes a new object within Sempedia. This is good except in cases where the object is not really an object but for example a number. If this were to be displayed in the object search then the list will be extremely long and messy.
+
+Moreover users are unlikely to want to to "faceted browsing" for exact matches of non-object values like numbers. They are more likely going to want to specify a range of parameters (e.g. numbers) and match all items that fit the criteria.
+
+= Details =
+
+The solution
