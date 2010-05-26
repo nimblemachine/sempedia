@@ -22,7 +22,7 @@ public class SeedSearch extends HttpServlet{
 		response.setContentType("text/html");
 		String searchString = (String)request.getParameter("searchString");
 
-System.out.println("The search string is: "+searchString);
+//System.out.println("The search string is: "+searchString);
 		
 		HashMap<Integer,String> objects = new HashMap<Integer,String>();
 		HashMap<Integer,String> classes = new HashMap<Integer,String>();		
